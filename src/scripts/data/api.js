@@ -226,3 +226,14 @@ async function unsubscribeNotification(token, endpoint) {
       throw error;
   }
 }
+
+export {
+  register,
+  login,
+  addNewStory,
+  addNewStoryGuest,
+  getAllStories,
+  getStoryDetail,
+  subscribeNotification,
+  unsubscribeNotification
+};
