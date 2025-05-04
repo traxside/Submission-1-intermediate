@@ -1,6 +1,6 @@
 import Story from '../../data/story';
 import CONFIG from '../../config';
-import { showLoading, showFormattedDate, showAlert, initMap } from '../../utils';
+import { showLoading, showFormattedDate, showAlert, initMap, addMarker } from '../../utils';
 
 export default class DetailStoryPage {
   async render(id) {
@@ -53,7 +53,7 @@ export default class DetailStoryPage {
             ${hasLocation ? `
               <div class="story-location">
                 <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
-                <div id="story-map" class="story-detail-map"></div>
+                <div id="story-map" class="story-detail-map" style="height: 400px; width: 100%;"></div>
                 <p class="location-coordinates">
                   <i class="fas fa-crosshairs"></i> Coordinates: ${parseFloat(story.lat).toFixed(6)}, ${parseFloat(story.lon).toFixed(6)}
                 </p>
@@ -63,23 +63,34 @@ export default class DetailStoryPage {
         </div>
       `;
       
-      // Initialize map if location exists with enhanced functionality
+      // Initialize map if location exists
       if (hasLocation) {
+        // Wait for DOM to be ready
         setTimeout(() => {
-          const map = initMap('story-map', {
-            center: { lat: story.lat, lng: story.lon },
-            zoom: 15
-          });
-          
-          // Add a highly visible marker
-          addMarker(map, story.lat, story.lon, {
-            title: 'Story location',
-            popupContent: `<strong>Story location</strong><br>\${story.name}'s story`
-          });
-          
-          // Ensure map renders correctly
-          setTimeout(() => map.invalidateSize(), 300);
-        }, 100);
+          try {
+            // Initialize map
+            const map = initMap('story-map', {
+              center: { lat: story.lat, lng: story.lon },
+              zoom: 15
+            });
+            
+            if (map) {
+              // Add marker with popup
+              addMarker(map, story.lat, story.lon, {
+                title: 'Story location',
+                popupContent: `<strong>${story.name}'s story</strong><br>Location`
+              });
+              
+              // Fix map rendering issues
+              setTimeout(() => {
+                map.invalidateSize(true);
+              }, 300);
+            }
+          } catch (error) {
+            console.error('Error initializing story map:', error);
+            document.getElementById('story-map').innerHTML = '<div class="error-message">Could not load map</div>';
+          }
+        }, 500);
       }
     } catch (error) {
       storyDetailContainer.innerHTML = `<div class="error-message">Failed to load story: ${error.message}</div>`;

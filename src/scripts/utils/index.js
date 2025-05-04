@@ -66,66 +66,93 @@ export function createStoryItemTemplate(story) {
   `;
 }
 
+// Updates to utils/index.js map-related functions
+
 export function initMap(containerId, options = {}) {
+  // Default values for map initialization
   const defaultLocation = { lat: -6.2088, lng: 106.8456 }; // Jakarta
   const { lat, lng } = options.center || defaultLocation;
   const zoom = options.zoom || 10;
   
   // Create container with fixed height if not already set
   const mapContainer = document.getElementById(containerId);
-  if (mapContainer) {
-    // Ensure the container has dimensions
-    if (!mapContainer.style.height) {
-      mapContainer.style.height = '400px';
-    }
-    if (!mapContainer.style.width) {
-      mapContainer.style.width = '100%';
-    }
+  if (!mapContainer) {
+    console.error(`Map container with ID ${containerId} not found`);
+    return null;
   }
   
-  // Initialize map with specific options to fix rendering issues
-  const map = L.map(containerId, {
-    center: [lat, lng],
-    zoom: zoom,
-    zoomControl: true,
-    zoomAnimation: true,
-    fadeAnimation: true,
-    attributionControl: true,
-    minZoom: 3,
-    maxZoom: 18
-  });
+  // Ensure the container has dimensions
+  if (!mapContainer.style.height) {
+    mapContainer.style.height = '400px';
+  }
+  if (!mapContainer.style.width) {
+    mapContainer.style.width = '100%';
+  }
   
-  // Use OpenStreetMap as primary source (doesn't require API key)
-  const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-    subdomains: ['a', 'b', 'c'],
-    maxZoom: 19,
-    crossOrigin: true
-  }).addTo(map);
+  // Make sure Leaflet is available
+  if (typeof L === 'undefined') {
+    console.error('Leaflet library is not loaded');
+    return null;
+  }
   
-  // Fix common rendering issues by triggering a resize after initialization
-  setTimeout(() => {
-    map.invalidateSize();
-  }, 100);
-  
-  return map;
+  try {
+    // Initialize map with specific options to fix rendering issues
+    const map = L.map(containerId, {
+      center: [lat, lng],
+      zoom: zoom,
+      zoomControl: true,
+      zoomAnimation: true,
+      fadeAnimation: true,
+      attributionControl: true,
+      minZoom: 3,
+      maxZoom: 18
+    });
+    
+    // Use OpenStreetMap as primary source (doesn't require API key)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      subdomains: ['a', 'b', 'c'],
+      maxZoom: 19,
+      crossOrigin: true
+    }).addTo(map);
+    
+    // Fix common rendering issues by triggering a resize after initialization
+    setTimeout(() => {
+      map.invalidateSize(true);
+    }, 300);
+    
+    return map;
+  } catch (error) {
+    console.error('Error initializing map:', error);
+    return null;
+  }
 }
 
 // Create a visible marker
 export function addMarker(map, lat, lng, options = {}) {
-  // Use a standard, highly visible marker
-  const marker = L.marker([lat, lng], {
-    draggable: options.draggable || false,
-    title: options.title || 'Location',
-    alt: options.alt || 'Location marker'
-  }).addTo(map);
-  
-  // Add a popup if content is provided
-  if (options.popupContent) {
-    marker.bindPopup(options.popupContent);
+  if (!map) {
+    console.error('Map is not initialized');
+    return null;
   }
   
-  return marker;
+  try {
+    // Use a standard, highly visible marker
+    const marker = L.marker([lat, lng], {
+      draggable: options.draggable || false,
+      title: options.title || 'Location',
+      alt: options.alt || 'Location marker'
+    }).addTo(map);
+    
+    // Add a popup if content is provided
+    if (options.popupContent) {
+      marker.bindPopup(options.popupContent).openPopup();
+    }
+    
+    return marker;
+  } catch (error) {
+    console.error('Error adding marker:', error);
+    return null;
+  }
 }
 
 // Update location display with proper formatting
