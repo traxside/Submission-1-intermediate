@@ -221,20 +221,34 @@ export default class AddStoryPage {
     
     startCameraButton.addEventListener('click', async () => {
       try {
-        await this.camera.start();
         startCameraButton.disabled = true;
+        startCameraButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting camera...';
+        
+        await this.camera.start();
+        
+        startCameraButton.innerHTML = '<i class="fas fa-camera"></i> Restart Camera';
+        startCameraButton.disabled = false;
         capturePhotoButton.disabled = false;
       } catch (error) {
-        showAlert('Failed to start camera', 'error');
+        startCameraButton.disabled = false;
+        startCameraButton.innerHTML = '<i class="fas fa-camera"></i> Start Camera';
+        showAlert('Failed to start camera: ' + (error.message || 'Unknown error'), 'error');
       }
     });
     
     capturePhotoButton.addEventListener('click', async () => {
       try {
+        capturePhotoButton.disabled = true;
+        capturePhotoButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
         this.photoBlob = await this.camera.takeSnapshot();
-        capturePhotoButton.textContent = 'Retake Photo';
+        
+        capturePhotoButton.innerHTML = '<i class="fas fa-camera-retro"></i> Retake Photo';
+        capturePhotoButton.disabled = false;
       } catch (error) {
-        showAlert('Failed to capture photo', 'error');
+        capturePhotoButton.innerHTML = '<i class="fas fa-camera-retro"></i> Take Photo';
+        capturePhotoButton.disabled = false;
+        showAlert('Failed to capture photo: ' + (error.message || 'Unknown error'), 'error');
       }
     });
     
@@ -372,6 +386,16 @@ export default class AddStoryPage {
     }, 250);
   }
   
+  _cleanupCamera() {
+    if (this.camera) {
+      try {
+        this.camera.stop();
+      } catch (error) {
+        console.error('Error stopping camera:', error);
+      }
+    }
+  }
+
   // Cleanup resources when page is unloaded
   destroy() {
     // Remove event listeners
@@ -384,8 +408,6 @@ export default class AddStoryPage {
     }
     
     // Clean up camera
-    if (this.camera) {
-      this.camera.stop();
-    }
+    this._cleanupCamera();
   }
 }

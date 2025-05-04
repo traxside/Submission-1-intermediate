@@ -174,52 +174,85 @@ export function createCameraElement(videoContainerId, snapshotContainerId) {
   
   const startCamera = async () => {
     try {
+      // First, stop any existing stream
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+      }
+      
+      // Basic video constraints - avoid specifying resolution
       stream = await navigator.mediaDevices.getUserMedia({
-        video: {
-          facingMode: 'environment'
-        }
+        video: true,
+        audio: false
       });
       
       const videoContainer = document.getElementById(videoContainerId);
+      
+      // Clear any existing content
+      videoContainer.innerHTML = '';
+      
+      // Create video element
       videoElement = document.createElement('video');
       videoElement.srcObject = stream;
       videoElement.autoplay = true;
+      videoElement.playsInline = true; // Important for iOS
+      videoElement.muted = true;
       videoElement.classList.add('camera-preview');
       
-      videoContainer.innerHTML = '';
+      // Append to container
       videoContainer.appendChild(videoElement);
+      
+      // Wait for video to load before taking any measurements
+      await new Promise((resolve) => {
+        videoElement.onloadedmetadata = () => {
+          resolve();
+        };
+      });
+      
+      // Start playing
+      await videoElement.play();
       
       return stream;
     } catch (error) {
       console.error('Error accessing camera:', error);
-      showAlert('Could not access camera. Please make sure you have granted permission.', 'error');
+      const errorMessage = error.name === 'NotAllowedError' 
+        ? 'Camera access denied. Please grant permission in your browser settings.'
+        : `Could not access camera: ${error.message}`;
+      
+      document.getElementById(videoContainerId).innerHTML = `
+        <div style="color: white; text-align: center; padding: 20px;">
+          <p>${errorMessage}</p>
+        </div>
+      `;
       throw error;
     }
   };
   
   const takeSnapshot = () => {
     if (!videoElement || !stream) {
-      showAlert('Camera is not initialized', 'error');
+      console.error('Camera is not initialized');
       return null;
     }
     
+    // Create canvas with video dimensions
     const canvas = document.createElement('canvas');
     canvas.width = videoElement.videoWidth;
     canvas.height = videoElement.videoHeight;
     
+    // Draw video frame to canvas
     const ctx = canvas.getContext('2d');
     ctx.drawImage(videoElement, 0, 0, canvas.width, canvas.height);
     
+    // Show the snapshot
     const snapshotContainer = document.getElementById(snapshotContainerId);
     snapshotContainer.innerHTML = `
       <img src="${canvas.toDataURL('image/jpeg')}" alt="Camera snapshot" class="snapshot-preview">
     `;
     
-    // Return the blob
+    // Return as blob
     return new Promise((resolve) => {
       canvas.toBlob((blob) => {
         resolve(blob);
-      }, 'image/jpeg', 0.95);
+      }, 'image/jpeg', 0.9);
     });
   };
   
@@ -227,10 +260,11 @@ export function createCameraElement(videoContainerId, snapshotContainerId) {
     if (stream) {
       stream.getTracks().forEach(track => track.stop());
       stream = null;
-      
-      if (videoElement) {
-        videoElement.srcObject = null;
-      }
+    }
+    
+    if (videoElement) {
+      videoElement.srcObject = null;
+      videoElement = null;
     }
   };
   
