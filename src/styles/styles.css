@@ -67,7 +67,6 @@ body {
   padding: 1rem;
 }
 
-/* Header */
 header {
   background-color: var(--dark-color);
   color: white;
@@ -78,29 +77,28 @@ header {
   view-transition-name: header;
 }
 
-.header-content {
+.main-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   height: var(--header-height);
 }
 
-.app-logo {
-  display: flex;
-  align-items: center;
-  text-decoration: none;
+.brand-name {
   color: white;
+  text-decoration: none;
   font-size: 1.5rem;
   font-weight: bold;
+  transition: color var(--transition-speed);
 }
 
-.app-logo i {
-  margin-right: 0.5rem;
+.brand-name:hover,
+.brand-name:focus {
   color: var(--secondary-color);
 }
 
 /* Navigation */
-.nav-toggle {
+.drawer-button {
   background: none;
   border: none;
   color: white;
@@ -109,28 +107,36 @@ header {
   display: none;
 }
 
-#navigation-drawer {
+.navigation-drawer {
   transition: transform var(--transition-speed);
 }
 
-#nav-list {
+.nav-list {
   display: flex;
   list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-#nav-list li {
+.nav-list li {
   margin-left: 1.5rem;
 }
 
-#nav-list a {
+.nav-list a {
   color: white;
   text-decoration: none;
   font-weight: 500;
   position: relative;
-  padding-bottom: 5px;
+  padding: 0.5rem 0;
+  transition: color var(--transition-speed);
 }
 
-#nav-list a::after {
+.nav-list a:hover,
+.nav-list a:focus {
+  color: var(--secondary-color);
+}
+
+.nav-list a::after {
   content: '';
   position: absolute;
   bottom: 0;
@@ -141,8 +147,32 @@ header {
   transition: width var(--transition-speed);
 }
 
-#nav-list a:hover::after,
-#nav-list a:focus::after {
+.nav-list a:hover::after,
+.nav-list a:focus::after {
+  width: 100%;
+}
+
+/* Active navigation item style */
+.nav-list a.active::after,
+.nav-list a[href="#/"].active::after,
+.nav-list a[href="#/"].active::after {
+  width: 100%;
+}
+
+/* Highlight current page in navigation */
+.nav-list a[href$="#/about"]:target,
+.nav-list a[href$="#/profile"]:target,
+.nav-list a[href$="#/add"]:target,
+.nav-list a[href$="#/login"]:target,
+.nav-list a[href$="#/register"]:target {
+  color: var(--secondary-color);
+}
+
+.nav-list a[href$="#/about"]:target::after,
+.nav-list a[href$="#/profile"]:target::after,
+.nav-list a[href$="#/add"]:target::after,
+.nav-list a[href$="#/login"]:target::after,
+.nav-list a[href$="#/register"]:target::after {
   width: 100%;
 }
 
@@ -1042,5 +1072,42 @@ input[type="file"] {
   .about-content,
   .profile-content {
     grid-template-columns: 1fr;
+  }
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .drawer-button {
+    display: block;
+  }
+  
+  .navigation-drawer {
+    position: fixed;
+    top: var(--header-height);
+    right: 0;
+    width: 250px;
+    height: calc(100vh - var(--header-height));
+    background-color: var(--dark-color);
+    transform: translateX(100%);
+    box-shadow: -2px 0 5px rgba(0, 0, 0, 0.1);
+    z-index: 99;
+    padding: 1rem;
+  }
+  
+  .navigation-drawer.open {
+    transform: translateX(0);
+  }
+  
+  .nav-list {
+    flex-direction: column;
+  }
+  
+  .nav-list li {
+    margin: 0 0 1rem 0;
+  }
+  
+  .nav-list a {
+    display: block;
+    padding: 0.5rem 0;
   }
 }
