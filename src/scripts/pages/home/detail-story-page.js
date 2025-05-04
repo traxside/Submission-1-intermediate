@@ -54,23 +54,31 @@ export default class DetailStoryPage {
               <div class="story-location">
                 <h3><i class="fas fa-map-marker-alt"></i> Location</h3>
                 <div id="story-map" class="story-detail-map"></div>
+                <p class="location-coordinates">
+                  <i class="fas fa-crosshairs"></i> Coordinates: ${parseFloat(story.lat).toFixed(6)}, ${parseFloat(story.lon).toFixed(6)}
+                </p>
               </div>
             ` : ''}
           </div>
         </div>
       `;
       
-      // Initialize map if location exists
+      // Initialize map if location exists with enhanced functionality
       if (hasLocation) {
         setTimeout(() => {
           const map = initMap('story-map', {
             center: { lat: story.lat, lng: story.lon },
-            zoom: 15,
-            apiKey: CONFIG.MAP_TILER_KEY
+            zoom: 15
           });
           
-          // Add marker
-          L.marker([story.lat, story.lon]).addTo(map);
+          // Add a highly visible marker
+          addMarker(map, story.lat, story.lon, {
+            title: 'Story location',
+            popupContent: `<strong>Story location</strong><br>\${story.name}'s story`
+          });
+          
+          // Ensure map renders correctly
+          setTimeout(() => map.invalidateSize(), 300);
         }, 100);
       }
     } catch (error) {

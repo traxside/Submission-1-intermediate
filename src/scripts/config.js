@@ -1,6 +1,6 @@
 const CONFIG = {
   BASE_URL: 'https://story-api.dicoding.dev/v1',
-  MAP_TILER_KEY: 'MY_KEY',
+  MAP_TILER_KEY: 'ChVFA4WTImqqE0Tx33qF',
   DEFAULT_LOCATION: {
     lat: -6.2088, // Jakarta, Indonesia
     lng: 106.8456

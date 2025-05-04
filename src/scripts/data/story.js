@@ -1,12 +1,10 @@
-import Auth from './auth.js';
+import Auth from './auth';
 import { 
   getAllStories, 
-  getAllStoriesGuest, 
   getStoryDetail, 
-  getStoryDetailGuest, 
   addNewStory, 
   addNewStoryGuest 
-} from './api.js';
+} from './api';
 
 class Story {
   static async getAll({ page = null, size = null, location = null } = {}) {

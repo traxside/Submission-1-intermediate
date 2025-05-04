@@ -41,7 +41,7 @@ class App {
     
     // Build the navigation based on authentication state
     let navItems = `
-      <li><a href="#/">Home</a></li>
+      <li><a href="#/">Beranda</a></li>
       <li><a href="#/about">About</a></li>
     `;
 

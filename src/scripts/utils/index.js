@@ -67,48 +67,78 @@ export function createStoryItemTemplate(story) {
 }
 
 export function initMap(containerId, options = {}) {
-  const { lat, lng } = options.center || { lat: -6.2088, lng: 106.8456 }; // Default to Jakarta
+  const defaultLocation = { lat: -6.2088, lng: 106.8456 }; // Jakarta
+  const { lat, lng } = options.center || defaultLocation;
   const zoom = options.zoom || 10;
   
-  // Initialize the map
-  const map = L.map(containerId).setView([lat, lng], zoom);
+  // Create container with fixed height if not already set
+  const mapContainer = document.getElementById(containerId);
+  if (mapContainer) {
+    // Ensure the container has dimensions
+    if (!mapContainer.style.height) {
+      mapContainer.style.height = '400px';
+    }
+    if (!mapContainer.style.width) {
+      mapContainer.style.width = '100%';
+    }
+  }
   
-  // Add tile layers
-  const standardLayer = L.tileLayer('https://api.maptiler.com/maps/streets/{z}/{x}/{y}.png?key={apiKey}', {
-    attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
-    apiKey: options.apiKey,
-    tileSize: 512,
-    zoomOffset: -1
+  // Initialize map with specific options to fix rendering issues
+  const map = L.map(containerId, {
+    center: [lat, lng],
+    zoom: zoom,
+    zoomControl: true,
+    zoomAnimation: true,
+    fadeAnimation: true,
+    attributionControl: true,
+    minZoom: 3,
+    maxZoom: 18
   });
   
-  const satelliteLayer = L.tileLayer('https://api.maptiler.com/maps/hybrid/{z}/{x}/{y}.jpg?key={apiKey}', {
-    attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
-    apiKey: options.apiKey,
-    tileSize: 512,
-    zoomOffset: -1
-  });
+  // Use OpenStreetMap as primary source (doesn't require API key)
+  const baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+    subdomains: ['a', 'b', 'c'],
+    maxZoom: 19,
+    crossOrigin: true
+  }).addTo(map);
   
-  const darkLayer = L.tileLayer('https://api.maptiler.com/maps/darkmatter/{z}/{x}/{y}.png?key={apiKey}', {
-    attribution: '&copy; <a href="https://www.maptiler.com/">MapTiler</a>',
-    apiKey: options.apiKey,
-    tileSize: 512,
-    zoomOffset: -1
-  });
-  
-  // Add layer control
-  const baseMaps = {
-    "Standard": standardLayer,
-    "Satellite": satelliteLayer,
-    "Dark": darkLayer
-  };
-  
-  // Add the default layer
-  standardLayer.addTo(map);
-  
-  // Add layer control
-  L.control.layers(baseMaps).addTo(map);
+  // Fix common rendering issues by triggering a resize after initialization
+  setTimeout(() => {
+    map.invalidateSize();
+  }, 100);
   
   return map;
+}
+
+// Create a visible marker
+export function addMarker(map, lat, lng, options = {}) {
+  // Use a standard, highly visible marker
+  const marker = L.marker([lat, lng], {
+    draggable: options.draggable || false,
+    title: options.title || 'Location',
+    alt: options.alt || 'Location marker'
+  }).addTo(map);
+  
+  // Add a popup if content is provided
+  if (options.popupContent) {
+    marker.bindPopup(options.popupContent);
+  }
+  
+  return marker;
+}
+
+// Update location display with proper formatting
+export function updateLocationDisplay(elementId, lat, lng) {
+  const element = document.getElementById(elementId);
+  if (element) {
+    element.innerHTML = `
+      <div style="background-color: #f0f8ff; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0; border-radius: 4px;">
+        <strong>Location selected:</strong>
+        <p>Lat: ${parseFloat(lat).toFixed(6)}, Lng: ${parseFloat(lng).toFixed(6)}</p>
+      </div>
+    `;
+  }
 }
 
 export function createCameraElement(videoContainerId, snapshotContainerId) {

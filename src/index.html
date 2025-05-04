@@ -3,26 +3,41 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="Story Share App - Share your stories with photos and locations" />
     <link rel="shortcut icon" href="favicon.png">
-
-    <title>App</title>
+    <title>Story Share App</title>
+    
+    <!-- Add View Transition API support -->
+    <meta name="view-transition" content="same-origin" />
   </head>
   <body>
+    <!-- Skip to content link for accessibility -->
+    <a href="#main-content" class="skip-link">Skip to content</a>
+    
     <header>
       <div class="main-header container">
-        <a class="brand-name" href="#/">App</a>
+        <a class="brand-name" href="#/">Story Share App</a>
 
-        <nav id="navigation-drawer" class="navigation-drawer">
+        <button id="drawer-button" class="drawer-button" aria-label="Toggle navigation menu" aria-expanded="false" aria-controls="navigation-drawer">☰</button>
+        
+        <nav id="navigation-drawer" class="navigation-drawer" aria-label="Main navigation">
           <ul id="nav-list" class="nav-list">
-            <li><a href="#/">Beranda</a></li>
+            <li><a href="#/">Home</a></li>
             <li><a href="#/about">About</a></li>
+            <li><a href="#/login">Login</a></li>
+            <li><a href="#/register">Register</a></li>
           </ul>
         </nav>
-
-        <button id="drawer-button" class="drawer-button">☰</button>
       </div>
     </header>
 
-    <main id="main-content" class="main-content"></main>
+    <main id="main-content" class="main-content" tabindex="-1"></main>
+
+    <footer class="footer">
+      <div class="container">
+        <p>&copy; 2025 Story Share App. All rights reserved.</p>
+      </div>
+    </footer>
   </body>
 </html>
+
