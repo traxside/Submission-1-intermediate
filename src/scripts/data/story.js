@@ -15,10 +15,10 @@ class Story {
         const response = await getAllStories(token, { page, size, location });
         return response;
       } else {
-        const response = await getAllStoriesGuest({ page, size, location });
-        return response;
+        throw new Error("Missing Authentication");
       }
     } catch (error) {
+      console.log(error.message);
       throw error;
     }
   }
@@ -31,8 +31,7 @@ class Story {
         const response = await getStoryDetail(token, id);
         return response;
       } else {
-        const response = await getStoryDetailGuest(id);
-        return response;
+        throw new Error("Missing Authentication");
       }
     } catch (error) {
       throw error;
