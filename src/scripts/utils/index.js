@@ -78,6 +78,9 @@ export function initMap(containerId, options = {}) {
     return null;
   }
   
+  // Clear map 
+  mapContainer.innerHTML = '';
+
   // Ensure the container has dimensions
   if (!mapContainer.style.height) {
     mapContainer.style.height = '400px';
@@ -149,12 +152,12 @@ export function addMarker(map, lat, lng, options = {}) {
   }
 }
 
-export function updateLocationDisplay(elementId, lat, lng) {
+export function updateLocationDisplay(elementId, lat, lng, storyName = null) {
   const element = document.getElementById(elementId);
   if (element) {
     element.innerHTML = `
       <div style="background-color: #f0f8ff; border-left: 4px solid #3498db; padding: 10px; margin: 10px 0; border-radius: 4px;">
-        <strong>Location selected:</strong>
+        <strong>${storyName ? `${storyName}'s Story Location` : 'Location selected:'}</strong>
         <p>Lat: ${parseFloat(lat).toFixed(6)}, Lng: ${parseFloat(lng).toFixed(6)}</p>
       </div>
     `;
