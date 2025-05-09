@@ -39,7 +39,6 @@ class App {
   _updateNavigation() {
     const isLoggedIn = Auth.isLoggedIn();
     
-    // Build the navigation based on authentication state
     let navItems = `
       <li><a href="#/">Beranda</a></li>
       <li><a href="#/about">About</a></li>
@@ -60,7 +59,7 @@ class App {
 
     this.#navList.innerHTML = navItems;
     
-    // Add logout handler
+    // Logout handler
     const logoutButton = document.querySelector('#logout-button');
     if (logoutButton) {
       logoutButton.addEventListener('click', (event) => {

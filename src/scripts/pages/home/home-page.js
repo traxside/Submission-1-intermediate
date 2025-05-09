@@ -5,9 +5,6 @@ import { createStoryItemTemplate, showLoading, showAlert, initMap } from '../../
 export default class HomePage {
   async render() {
     return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
       <section class="container home-page">
         <h1 class="page-title">Latest Stories</h1>
         <div id="main-content" class="story-list-container">

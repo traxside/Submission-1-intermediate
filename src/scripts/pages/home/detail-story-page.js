@@ -81,7 +81,6 @@ export default class DetailStoryPage {
                 popupContent: `<strong>${story.name}'s story</strong><br>Location`
               });
               
-              // Fix map rendering issues
               setTimeout(() => {
                 map.invalidateSize(true);
               }, 300);

@@ -14,4 +14,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   window.addEventListener('hashchange', async () => {
     await app.renderPage();
   });
+  const mainContent = document.querySelector('#main-content');
+  const skipLink = document.querySelector('.skip-link');
+  
+  skipLink.addEventListener('click', function (event) {
+      event.preventDefault(); // Prevent page refresh
+      
+      // Focus on main content and scroll to it
+      mainContent.focus(); // Focus on main content
+      mainContent.scrollIntoView({behavior: 'smooth'}); // Scroll to main content smoothly
+  });
+
 });

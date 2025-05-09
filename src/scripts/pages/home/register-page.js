@@ -4,9 +4,6 @@ import { showAlert } from '../../utils';
 export default class RegisterPage {
   async render() {
     return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
       <section class="container auth-page">
         <div class="auth-container" id="main-content">
           <h1 class="page-title">Register</h1>

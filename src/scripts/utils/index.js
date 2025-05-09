@@ -66,15 +66,12 @@ export function createStoryItemTemplate(story) {
   `;
 }
 
-// Updates to utils/index.js map-related functions
-
 export function initMap(containerId, options = {}) {
   // Default values for map initialization
   const defaultLocation = { lat: -6.2088, lng: 106.8456 }; // Jakarta
   const { lat, lng } = options.center || defaultLocation;
   const zoom = options.zoom || 10;
   
-  // Create container with fixed height if not already set
   const mapContainer = document.getElementById(containerId);
   if (!mapContainer) {
     console.error(`Map container with ID ${containerId} not found`);
@@ -108,7 +105,6 @@ export function initMap(containerId, options = {}) {
       maxZoom: 18
     });
     
-    // Use OpenStreetMap as primary source (doesn't require API key)
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
       subdomains: ['a', 'b', 'c'],
@@ -116,7 +112,6 @@ export function initMap(containerId, options = {}) {
       crossOrigin: true
     }).addTo(map);
     
-    // Fix common rendering issues by triggering a resize after initialization
     setTimeout(() => {
       map.invalidateSize(true);
     }, 300);
@@ -136,14 +131,13 @@ export function addMarker(map, lat, lng, options = {}) {
   }
   
   try {
-    // Use a standard, highly visible marker
     const marker = L.marker([lat, lng], {
       draggable: options.draggable || false,
       title: options.title || 'Location',
       alt: options.alt || 'Location marker'
     }).addTo(map);
     
-    // Add a popup if content is provided
+    // Add a popup 
     if (options.popupContent) {
       marker.bindPopup(options.popupContent).openPopup();
     }
@@ -155,7 +149,6 @@ export function addMarker(map, lat, lng, options = {}) {
   }
 }
 
-// Update location display with proper formatting
 export function updateLocationDisplay(elementId, lat, lng) {
   const element = document.getElementById(elementId);
   if (element) {
@@ -174,12 +167,11 @@ export function createCameraElement(videoContainerId, snapshotContainerId) {
   
   const startCamera = async () => {
     try {
-      // First, stop any existing stream
+      // Stop any existing stream
       if (stream) {
         stream.getTracks().forEach(track => track.stop());
       }
       
-      // Basic video constraints - avoid specifying resolution
       stream = await navigator.mediaDevices.getUserMedia({
         video: true,
         audio: false

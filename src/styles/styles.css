@@ -610,7 +610,6 @@ footer {
   background-color: #000;
 }
 
-/* Make sure buttons have proper spacing and are visible */
 .camera-controls {
   display: flex;
   gap: 1rem;
@@ -619,7 +618,6 @@ footer {
   position: relative;
 }
 
-/* Make snapshot container consistent with video container */
 .snapshot-container {
   width: 100%;
   height: 300px;
@@ -1054,47 +1052,6 @@ input[type="file"] {
   padding: 2rem;
   color: #777;
   font-style: italic;
-}
-
-/* Responsive Styles */
-@media (max-width: 768px) {
-  .nav-toggle {
-    display: block;
-  }
-  
-  #navigation-drawer {
-    position: fixed;
-    top: var(--header-height);
-    right: 0;
-    width: 250px;
-    height: calc(100vh - var(--header-height));
-    background-color: var(--dark-color);
-    transform: translateX(100%);
-    box-shadow: var(--shadow);
-    z-index: 99;
-  }
-  
-  #navigation-drawer.open {
-    transform: translateX(0);
-  }
-  
-  #nav-list {
-    flex-direction: column;
-    padding: 1rem;
-  }
-  
-  #nav-list li {
-    margin: 0 0 1rem 0;
-  }
-  
-  .story-list {
-    grid-template-columns: 1fr;
-  }
-  
-  .about-content,
-  .profile-content {
-    grid-template-columns: 1fr;
-  }
 }
 
 /* Responsive styles */

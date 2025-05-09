@@ -3,10 +3,7 @@ import { showAlert } from '../../utils';
 
 export default class LoginPage {
   async render() {
-    return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
+    return `  
       <section class="container auth-page">
         <div class="auth-container" id="main-content">
           <h1 class="page-title">Login</h1>

@@ -4,9 +4,6 @@ import { showAlert } from '../../utils';
 export default class ProfilePage {
   async render() {
     return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
       <section class="container profile-page" id="main-content">
         <h1 class="page-title">Your Profile</h1>
         

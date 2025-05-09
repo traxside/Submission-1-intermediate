@@ -24,9 +24,6 @@ export default class AddStoryPage {
 
   async render() {
     return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
       <section class="container add-story-page" id="main-content">
         <h1 class="page-title">Share Your Story</h1>
         
@@ -92,15 +89,12 @@ export default class AddStoryPage {
     // Initialize camera
     this.camera = createCameraElement('video-container', 'snapshot-container');
     
-    // We'll delay map initialization until the form group is visible
     this._setupMapInitialization();
     
-    // Set up event listeners
     this._setupEventListeners();
   }
   
   _setupMapInitialization() {
-    // Use Intersection Observer to initialize map when it comes into view
     const mapContainer = document.getElementById('location-map');
     const observer = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !this.mapInitialized) {
@@ -126,7 +120,6 @@ export default class AddStoryPage {
     try {
       const mapContainer = document.getElementById('location-map');
       
-      // Ensure the container has proper height for map display
       if (!mapContainer.style.height) {
         mapContainer.style.height = '400px';
       }
@@ -143,7 +136,6 @@ export default class AddStoryPage {
         this._selectPosition(lat, lng);
       });
       
-      // Fix map display issues by forcing a resize
       setTimeout(() => {
         this.map.invalidateSize();
       }, 500);
@@ -154,19 +146,15 @@ export default class AddStoryPage {
   }
   
   _selectPosition(lat, lng) {
-    // Update selected position
     this.selectedPosition = { lat, lng };
     
     try {
-      // Update marker on map with animation
       if (this.marker) {
-        // Update marker position with animation instead of removing/adding
         this.marker.setLatLng([lat, lng]);
       } else {
-        // Create marker with proper configuration
         this.marker = L.marker([lat, lng], {
-          draggable: true, // Allow users to fine-tune position
-          autoPan: true,   // Pan map when dragging to edge
+          draggable: true,
+          autoPan: true,
           title: 'Your selected location'
         }).addTo(this.map);
         
