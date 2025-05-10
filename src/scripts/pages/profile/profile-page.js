@@ -1,7 +1,16 @@
+import ProfilePresenter from './profile-presenter.js';
 import Auth from '../../data/auth';
-import { showAlert } from '../../utils';
 
 export default class ProfilePage {
+  #presenter;
+
+  constructor() {
+    this.#presenter = new ProfilePresenter({ 
+      view: this,
+      model: Auth
+    });
+  }
+  
   async render() {
     return `
       <section class="container profile-page" id="main-content">
@@ -27,33 +36,26 @@ export default class ProfilePage {
   }
 
   async afterRender() {
-    const profileInfo = document.getElementById('profile-info');
+    await this.#presenter.loadProfile();
+    this._setupEventListeners();
+  }
+  
+  _setupEventListeners() {
     const logoutButton = document.getElementById('logout-button');
     
-    // Get user information
-    const user = Auth.getUser();
-    
-    if (!user) {
-      // Redirect to login if no user found
-      window.location.hash = '#/login';
-      return;
-    }
+    // Add logout handler
+    logoutButton.addEventListener('click', () => {
+      this.#presenter.logout();
+    });
+  }
+  
+  showProfile(user) {
+    const profileInfo = document.getElementById('profile-info');
     
     // Display user information
     profileInfo.innerHTML = `
       <h2>${user.name}</h2>
       <p>User ID: ${user.id}</p>
     `;
-    
-    // Add logout handler
-    logoutButton.addEventListener('click', () => {
-      Auth.logout();
-      showAlert('You have been logged out', 'info');
-      
-      // Redirect to home page
-      setTimeout(() => {
-        window.location.hash = '#/';
-      }, 1500);
-    });
   }
 }

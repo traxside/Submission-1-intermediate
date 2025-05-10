@@ -1,7 +1,16 @@
+import LoginPresenter from './login-presenter.js';
 import Auth from '../../data/auth';
-import { showAlert } from '../../utils';
 
 export default class LoginPage {
+  #presenter;
+
+  constructor() {
+    this.#presenter = new LoginPresenter({ 
+      view: this,
+      model: Auth
+    });
+  }
+  
   async render() {
     return `  
       <section class="container auth-page">
@@ -25,6 +34,10 @@ export default class LoginPage {
   }
 
   async afterRender() {
+    this._setupEventListeners();
+  }
+  
+  _setupEventListeners() {
     const loginForm = document.getElementById('login-form');
     
     loginForm.addEventListener('submit', async (event) => {
@@ -33,29 +46,7 @@ export default class LoginPage {
       const email = document.getElementById('email').value;
       const password = document.getElementById('password').value;
       
-      // Simple validation
-      if (!email || !password) {
-        showAlert('Please fill in all fields', 'error');
-        return;
-      }
-      
-      try {
-        const response = await Auth.login(email, password);
-        
-        if (response.error) {
-          showAlert(response.message, 'error');
-          return;
-        }
-        
-        showAlert('Login successful! Redirecting...', 'success');
-        
-        // Redirect after successful login
-        setTimeout(() => {
-          window.location.hash = '#/';
-        }, 1500);
-      } catch (error) {
-        showAlert(`Login failed: ${error.message}`, 'error');
-      }
+      await this.#presenter.login(email, password);
     });
   }
 }

@@ -1,15 +1,14 @@
 import Story from '../../data/story';
 import CONFIG from '../../config';
-import { showAlert, createCameraElement, initMap, addMarker, updateLocationDisplay } from '../../utils';
+import { createCameraElement, initMap, updateLocationDisplay } from '../../utils';
 import L from 'leaflet';
+import AddStoryPresenter from './add-story-presenter.js';
 
 export default class AddStoryPage {
   constructor() {
     this.camera = null;
     this.map = null;
     this.marker = null;
-    this.selectedPosition = null;
-    this.photoBlob = null;
     this.mapInitialized = false;
     this.resizeTimeout = null;
     this.markerIcon = L.icon({
@@ -20,6 +19,9 @@ export default class AddStoryPage {
       popupAnchor: [1, -34],
       shadowSize: [41, 41]
     });
+    
+    // Will be initialized in afterRender
+    this.presenter = null;
   }
 
   async render() {
@@ -89,8 +91,16 @@ export default class AddStoryPage {
     // Initialize camera
     this.camera = createCameraElement('video-container', 'snapshot-container');
     
+    // Setup map observation
     this._setupMapInitialization();
     
+    // Initialize presenter
+    this.presenter = new AddStoryPresenter({
+      view: this,
+      model: Story
+    });
+    
+    // Setup event listeners
     this._setupEventListeners();
   }
   
@@ -133,7 +143,7 @@ export default class AddStoryPage {
       // Add click event to map
       this.map.on('click', (e) => {
         const { lat, lng } = e.latlng;
-        this._selectPosition(lat, lng);
+        this.presenter.selectPosition(lat, lng);
       });
       
       setTimeout(() => {
@@ -141,13 +151,12 @@ export default class AddStoryPage {
       }, 500);
     } catch (error) {
       console.error('Map initialization error:', error);
-      showAlert('Failed to initialize map. Please try refreshing the page.', 'error');
+      this.presenter.showAlert('Failed to initialize map. Please try refreshing the page.', 'error');
     }
   }
   
-  _selectPosition(lat, lng) {
-    this.selectedPosition = { lat, lng };
-    
+  // View methods called by presenter
+  selectPosition(lat, lng) {
     try {
       if (this.marker) {
         this.marker.setLatLng([lat, lng]);
@@ -164,8 +173,7 @@ export default class AddStoryPage {
         // Update location when marker is dragged
         this.marker.on('dragend', (e) => {
           const position = e.target.getLatLng();
-          this.selectedPosition = { lat: position.lat, lng: position.lng };
-          updateLocationDisplay('selected-location', position.lat, position.lng);
+          this.presenter.selectPosition(position.lat, position.lng);
         });
       }
       
@@ -173,8 +181,48 @@ export default class AddStoryPage {
       updateLocationDisplay('selected-location', lat, lng);
     } catch (error) {
       console.error('Error setting map position:', error);
-      showAlert('Failed to set map position. Please try again.', 'error');
+      this.presenter.showAlert('Failed to set map position. Please try again.', 'error');
     }
+  }
+  
+  setMapView(lat, lng, zoom) {
+    if (this.map) {
+      this.map.setView([lat, lng], zoom);
+    }
+  }
+  
+  resetMap() {
+    if (this.map && this.marker) {
+      this.map.removeLayer(this.marker);
+      this.marker = null;
+      document.getElementById('selected-location').innerHTML = '';
+    }
+  }
+  
+  disableButton(buttonId, loading = false, text = '') {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.disabled = true;
+      if (loading) {
+        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (text || 'Loading...');
+      }
+    }
+  }
+  
+  enableButton(buttonId, text = '') {
+    const button = document.getElementById(buttonId);
+    if (button) {
+      button.disabled = false;
+      if (text) {
+        button.innerHTML = text;
+      }
+    }
+  }
+  
+  updateFilePreview(dataUrl) {
+    document.getElementById('snapshot-container').innerHTML = `
+      <img src="${dataUrl}" alt="Preview" class="snapshot-preview">
+    `;
   }
   
   _setupEventListeners() {
@@ -185,6 +233,7 @@ export default class AddStoryPage {
     const uploadContainer = document.getElementById('upload-container');
     
     cameraTab.addEventListener('click', () => {
+      this.presenter.switchTab('camera');
       cameraTab.classList.add('active');
       uploadTab.classList.remove('active');
       cameraContainer.classList.add('active');
@@ -192,171 +241,52 @@ export default class AddStoryPage {
     });
     
     uploadTab.addEventListener('click', () => {
+      this.presenter.switchTab('upload');
       uploadTab.classList.add('active');
       cameraTab.classList.remove('active');
       uploadContainer.classList.add('active');
       cameraContainer.classList.remove('active');
-      
-      // Stop camera if running
-      this.camera.stop();
-      document.getElementById('capture-photo').disabled = true;
-      document.getElementById('start-camera').disabled = false;
     });
     
     // Camera controls
     const startCameraButton = document.getElementById('start-camera');
     const capturePhotoButton = document.getElementById('capture-photo');
     
-    startCameraButton.addEventListener('click', async () => {
-      try {
-        startCameraButton.disabled = true;
-        startCameraButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Starting camera...';
-        
-        await this.camera.start();
-        
-        startCameraButton.innerHTML = '<i class="fas fa-camera"></i> Restart Camera';
-        startCameraButton.disabled = false;
-        capturePhotoButton.disabled = false;
-      } catch (error) {
-        startCameraButton.disabled = false;
-        startCameraButton.innerHTML = '<i class="fas fa-camera"></i> Start Camera';
-        showAlert('Failed to start camera: ' + (error.message || 'Unknown error'), 'error');
-      }
+    startCameraButton.addEventListener('click', () => {
+      this.presenter.startCamera();
     });
     
-    capturePhotoButton.addEventListener('click', async () => {
-      try {
-        capturePhotoButton.disabled = true;
-        capturePhotoButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
-        
-        this.photoBlob = await this.camera.takeSnapshot();
-        
-        capturePhotoButton.innerHTML = '<i class="fas fa-camera-retro"></i> Retake Photo';
-        capturePhotoButton.disabled = false;
-      } catch (error) {
-        capturePhotoButton.innerHTML = '<i class="fas fa-camera-retro"></i> Take Photo';
-        capturePhotoButton.disabled = false;
-        showAlert('Failed to capture photo: ' + (error.message || 'Unknown error'), 'error');
-      }
+    capturePhotoButton.addEventListener('click', () => {
+      this.presenter.capturePhoto();
     });
     
     // File upload
     const photoUpload = document.getElementById('photo-upload');
     photoUpload.addEventListener('change', (e) => {
       if (e.target.files && e.target.files[0]) {
-        this.photoBlob = e.target.files[0];
-        
-        // Preview uploaded image
-        const reader = new FileReader();
-        reader.onload = (event) => {
-          document.getElementById('snapshot-container').innerHTML = `
-            <img src="${event.target.result}" alt="Uploaded preview" class="snapshot-preview">
-          `;
-        };
-        reader.readAsDataURL(this.photoBlob);
+        this.presenter.handleFileUpload(e.target.files[0]);
       }
     });
     
     // Current location
     const useCurrentLocationButton = document.getElementById('use-current-location');
     useCurrentLocationButton.addEventListener('click', () => {
-      if (navigator.geolocation) {
-        useCurrentLocationButton.disabled = true;
-        useCurrentLocationButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Getting location...';
-        
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const { latitude, longitude } = position.coords;
-            this._selectPosition(latitude, longitude);
-            this.map.setView([latitude, longitude], 15);
-            
-            useCurrentLocationButton.disabled = false;
-            useCurrentLocationButton.innerHTML = '<i class="fas fa-map-marker-alt"></i> Use My Current Location';
-          },
-          (error) => {
-            showAlert(`Geolocation error: ${error.message}`, 'error');
-            useCurrentLocationButton.disabled = false;
-            useCurrentLocationButton.innerHTML = '<i class="fas fa-map-marker-alt"></i> Use My Current Location';
-          },
-          { 
-            enableHighAccuracy: true,
-            timeout: 10000,
-            maximumAge: 0
-          }
-        );
-      } else {
-        showAlert('Geolocation is not supported by your browser', 'error');
-      }
+      this.presenter.useCurrentLocation();
     });
     
     // Reset map view
     const resetMapButton = document.getElementById('reset-map-view');
     resetMapButton.addEventListener('click', () => {
-      if (this.map) {
-        const defaultLocation = CONFIG.DEFAULT_LOCATION || { lat: -6.2088, lng: 106.8456 }; // Fallback to Jakarta
-        const defaultZoom = CONFIG.DEFAULT_ZOOM || 10;
-        
-        this.map.setView([defaultLocation.lat, defaultLocation.lng], defaultZoom);
-        
-        // Remove existing marker
-        if (this.marker) {
-          this.map.removeLayer(this.marker);
-          this.marker = null;
-        }
-        
-        // Clear selected location
-        this.selectedPosition = null;
-        document.getElementById('selected-location').innerHTML = '';
-      }
+      this.presenter.resetMap();
     });
     
     // Form submission
     const addStoryForm = document.getElementById('add-story-form');
-    addStoryForm.addEventListener('submit', async (e) => {
+    addStoryForm.addEventListener('submit', (e) => {
       e.preventDefault();
       
       const description = document.getElementById('description').value;
-      
-      if (!description) {
-        showAlert('Please enter a description', 'error');
-        return;
-      }
-      
-      if (!this.photoBlob) {
-        showAlert('Please take or upload a photo', 'error');
-        return;
-      }
-      
-      try {
-        // Prepare location data
-        let lat = null;
-        let lon = null;
-        
-        if (this.selectedPosition) {
-          lat = this.selectedPosition.lat;
-          lon = this.selectedPosition.lng;
-        }
-        
-        // Submit the story
-        const response = await Story.add(description, this.photoBlob, lat, lon);
-        
-        if (response.error) {
-          showAlert(response.message, 'error');
-          return;
-        }
-        
-        showAlert('Story shared successfully!', 'success');
-        
-        // Clean up
-        this.camera.stop();
-        
-        // Redirect to home page
-        setTimeout(() => {
-          window.location.hash = '#/';
-        }, 1500);
-      } catch (error) {
-        showAlert(`Failed to share story: ${error.message}`, 'error');
-      }
+      this.presenter.submitStory(description);
     });
     
     // Handle window resize events to update map
@@ -374,18 +304,11 @@ export default class AddStoryPage {
     }, 250);
   }
   
-  _cleanupCamera() {
-    if (this.camera) {
-      try {
-        this.camera.stop();
-      } catch (error) {
-        console.error('Error stopping camera:', error);
-      }
-    }
-  }
-
   // Cleanup resources when page is unloaded
   destroy() {
+    // Let presenter handle cleanup logic
+    this.presenter.cleanup();
+    
     // Remove event listeners
     window.removeEventListener('resize', this._handleResize.bind(this));
     
@@ -394,8 +317,5 @@ export default class AddStoryPage {
       this.map.remove();
       this.map = null;
     }
-    
-    // Clean up camera
-    this._cleanupCamera();
   }
 }

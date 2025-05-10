@@ -1,7 +1,16 @@
+import RegisterPresenter from './register-presenter.js';
 import Auth from '../../data/auth';
-import { showAlert } from '../../utils';
 
 export default class RegisterPage {
+  #presenter;
+
+  constructor() {
+    this.#presenter = new RegisterPresenter({ 
+      view: this,
+      model: Auth
+    });
+  }
+  
   async render() {
     return `
       <section class="container auth-page">
@@ -35,6 +44,10 @@ export default class RegisterPage {
   }
 
   async afterRender() {
+    this._setupEventListeners();
+  }
+  
+  _setupEventListeners() {
     const registerForm = document.getElementById('register-form');
     
     registerForm.addEventListener('submit', async (event) => {
@@ -45,34 +58,7 @@ export default class RegisterPage {
       const password = document.getElementById('password').value;
       const confirmPassword = document.getElementById('confirm-password').value;
       
-      // Simple validation
-      if (!name || !email || !password || !confirmPassword) {
-        showAlert('Please fill in all fields', 'error');
-        return;
-      }
-      
-      if (password !== confirmPassword) {
-        showAlert('Passwords do not match', 'error');
-        return;
-      }
-      
-      try {
-        const response = await Auth.register(name, email, password);
-        
-        if (response.error) {
-          showAlert(response.message, 'error');
-          return;
-        }
-        
-        showAlert('Registration successful! Please login.', 'success');
-        
-        // Redirect to login page after successful registration
-        setTimeout(() => {
-          window.location.hash = '#/login';
-        }, 1500);
-      } catch (error) {
-        showAlert(`Registration failed: ${error.message}`, 'error');
-      }
+      await this.#presenter.register(name, email, password, confirmPassword);
     });
   }
 }

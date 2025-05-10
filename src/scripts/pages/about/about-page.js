@@ -1,4 +1,12 @@
+import AboutPresenter from "./about-presenter.js";
+
 export default class AboutPage {
+  #presenter;
+
+  constructor() {
+    this.#presenter = new AboutPresenter({ view: this });
+  }
+
   async render() {
     return `
       <div class="skip-link-container">
