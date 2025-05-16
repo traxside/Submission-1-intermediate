@@ -11,6 +11,7 @@ export default class AddStoryPage {
     this.marker = null;
     this.mapInitialized = false;
     this.resizeTimeout = null;
+    this.mapObserver = null;
     this.markerIcon = L.icon({
       iconUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-icon.png',
       shadowUrl: 'https://unpkg.com/leaflet@1.7.1/dist/images/marker-shadow.png',
@@ -102,26 +103,30 @@ export default class AddStoryPage {
     
     // Setup event listeners
     this._setupEventListeners();
+    
   }
   
   _setupMapInitialization() {
     const mapContainer = document.getElementById('location-map');
-    const observer = new IntersectionObserver((entries) => {
+    
+    // Reset mapInitialized flag
+    this.mapInitialized = false;
+    
+    // Create and store the observer
+    this.mapObserver = new IntersectionObserver((entries) => {
       if (entries[0].isIntersecting && !this.mapInitialized) {
         this._initializeMap();
         this.mapInitialized = true;
-        observer.disconnect();
       }
     }, { threshold: 0.1 });
     
-    observer.observe(mapContainer);
+    this.mapObserver.observe(mapContainer);
     
     // Also initialize if user scrolled to map section manually
     mapContainer.addEventListener('mouseenter', () => {
       if (!this.mapInitialized) {
         this._initializeMap();
         this.mapInitialized = true;
-        observer.disconnect();
       }
     }, { once: true });
   }
@@ -129,6 +134,11 @@ export default class AddStoryPage {
   _initializeMap() {
     try {
       const mapContainer = document.getElementById('location-map');
+      
+      // Ensure map container is empty before initialization
+      while (mapContainer.firstChild) {
+        mapContainer.removeChild(mapContainer.firstChild);
+      }
       
       if (!mapContainer.style.height) {
         mapContainer.style.height = '400px';
@@ -146,8 +156,11 @@ export default class AddStoryPage {
         this.presenter.selectPosition(lat, lng);
       });
       
+      // Force a resize after initialization
       setTimeout(() => {
-        this.map.invalidateSize();
+        if (this.map) {
+          this.map.invalidateSize(true);
+        }
       }, 500);
     } catch (error) {
       console.error('Map initialization error:', error);
@@ -158,6 +171,11 @@ export default class AddStoryPage {
   // View methods called by presenter
   selectPosition(lat, lng) {
     try {
+      if (!this.map) {
+        console.warn('Map not initialized when attempting to select position');
+        return;
+      }
+      
       if (this.marker) {
         this.marker.setLatLng([lat, lng]);
       } else {
@@ -291,6 +309,7 @@ export default class AddStoryPage {
     
     // Handle window resize events to update map
     window.addEventListener('resize', this._handleResize.bind(this));
+    window.addEventListener('hashchange', this.destroy.bind(this));
   }
   
   _handleResize() {
@@ -307,15 +326,42 @@ export default class AddStoryPage {
   // Cleanup resources when page is unloaded
   destroy() {
     // Let presenter handle cleanup logic
-    this.presenter.cleanup();
+    if (this.presenter) {
+      this.presenter.cleanup();
+    }
     
     // Remove event listeners
     window.removeEventListener('resize', this._handleResize.bind(this));
+    window.addEventListener('hashchange', this.destroy.bind(this));
+    // Disconnect observer to prevent memory leaks
+    if (this.mapObserver) {
+      this.mapObserver.disconnect();
+      this.mapObserver = null;
+    }
     
     // Clean up map
     if (this.map) {
+      // Remove any markers first
+      if (this.marker) {
+        this.map.removeLayer(this.marker);
+        this.marker = null;
+      }
+      
+      // Remove all event listeners
+      this.map.off();
+      
+      // Remove the map
       this.map.remove();
       this.map = null;
     }
+    
+    // Clear the map container to ensure a clean slate for next initialization
+    const mapContainer = document.getElementById('location-map');
+    if (mapContainer) {
+      mapContainer.innerHTML = '';
+    }
+    
+    // Reset state
+    this.mapInitialized = false;
   }
 }
