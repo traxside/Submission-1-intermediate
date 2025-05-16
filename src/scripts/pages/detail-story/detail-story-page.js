@@ -53,13 +53,13 @@ export default class DetailStoryPage {
       </div>
       
       <div class="story-content">
-        <div class="story-image-container">
+        <div class="story-detail-image-container">
           <img src="${story.photoUrl}" alt="Story image from ${story.name}" class="story-detail-image">
         </div>
         
         <div class="story-info">
           <p class="story-date"><i class="fas fa-calendar"></i> ${showFormattedDate(story.createdAt)}</p>
-          <p class="story-description">${story.description}</p>
+          <p class="story-detail-description">${story.description}</p>
           
           ${hasLocation ? `
             <div class="story-location">

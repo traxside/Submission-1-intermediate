@@ -153,6 +153,7 @@ export default class AddStoryPresenter {
     if (this.view.camera) {
       try {
         this.view.camera.stop();
+        console.log("Camera stopped");
       } catch (error) {
         console.error('Error stopping camera:', error);
       }
