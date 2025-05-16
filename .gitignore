@@ -3,7 +3,7 @@
 .vscode
 node_modules
 dist
-
+public
 # Files
 .env
 STUDENT.txt
