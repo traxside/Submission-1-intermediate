@@ -15,7 +15,7 @@ class Story {
         const response = await getAllStories(token, { page, size, location });
         return response;
       } else {
-        throw new Error("Missing Authentication");
+        throw new Error("Missing Authentication : Please sign in or register to continue");
       }
     } catch (error) {
       console.log(error.message);
