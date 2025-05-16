@@ -42,7 +42,7 @@ export function showAlert(message, type = 'info', duration = 3000) {
 
 export function createStoryItemTemplate(story) {
   const hasLocation = story.lat && story.lon;
-  
+  // TODO
   return `
     <article class="story-item">
       <div class="story-image-container">
@@ -58,7 +58,7 @@ export function createStoryItemTemplate(story) {
           <p class="story-date">${showFormattedDate(story.createdAt)}</p>
           ${hasLocation ? `<button class="map-toggle-button" data-id="${story.id}" data-lat="${story.lat}" data-lon="${story.lon}">
             <i class="fas fa-map-marker-alt"></i> Show on map
-          </button>` : ''}
+          </button>` : ''} 
         </div>
       </div>
       <a href="#/story/${story.id}" class="story-link" aria-label="View details of story by ${story.name}"></a>

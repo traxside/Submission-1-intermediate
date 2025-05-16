@@ -6,8 +6,7 @@ export default class HomePresenter {
   #view;
   #model;
   #stories = [];
-  #map = null;
-  #marker = null;
+  #storyMaps = {};
 
   constructor({ view, model }) {
     this.#view = view;
@@ -34,6 +33,9 @@ export default class HomePresenter {
       this.#stories = response.listStory;
       this.#view.showStories(response.listStory);
       
+      // Setup inline maps after stories are rendered
+      this.setupInlineMaps();
+      
     } catch (error) {
       this.#view.showErrorMessage(`Failed to load stories: ${error.message}`);
     }
@@ -46,54 +48,58 @@ export default class HomePresenter {
   findStoryById(id) {
     return this.#stories.find(story => story.id === id);
   }
-
-  showStoryMap(storyId, lat, lon) {
-    const story = this.findStoryById(storyId);
+  
+  setupInlineMaps() {
+    const mapContainers = document.querySelectorAll('.story-map-container');
     
-    if (!story) {
-      this.#view.showErrorMessage('Story not found');
-      return;
-    }
-    
-    this.#view.showMapModal();
-    
-    // Clean up existing map
-    this._cleanupMap();
-    
-    // Initialize new map
-    this.#map = initMap('story-map', {
-      center: { lat, lng: lon },
-      zoom: 15,
-      apiKey: CONFIG.MAP_TILER_KEY
-    });
-    
-    if (this.#map) {
-      // Add marker
-      this.#marker = addMarker(this.#map, lat, lon, {
-        title: 'Story location',
-        popupContent: `<strong>${story.name}'s story</strong><br>Location`
+    // Initialize maps for each story that has location data
+    mapContainers.forEach(container => {
+      const storyID = container.dataset.id;
+      const lat = parseFloat(container.dataset.lat);
+      const lon = parseFloat(container.dataset.lon);
+      const mapElementId = `map-${storyID}`;
+      
+      // Clean up any existing map
+      if (this.#storyMaps[storyID]) {
+        this.#storyMaps[storyID].map.remove();
+        this.#storyMaps[storyID] = null;
+      }
+      
+      // Initialize map
+      const map = initMap(mapElementId, {
+        center: { lat, lng: lon },
+        zoom: 13
       });
       
-      // Resize map after modal is shown
-      setTimeout(() => {
-        if (this.#map) {
-          this.#map.invalidateSize(true);
-        }
-      }, 300);
-    } else {
-      this.#view.showMapError();
-    }
+      if (map) {
+        // Add marker
+        const story = this.findStoryById(storyID);
+        const marker = addMarker(map, lat, lon, {
+          title: 'Story location',
+          popupContent: `<strong>${story.name}'s story</strong><br>Location`
+        });
+        
+        // Store references
+        this.#storyMaps[storyID] = { map, marker };
+        
+        // Fix map rendering issues by invalidating size after a short delay
+        setTimeout(() => {
+          if (map) {
+            map.invalidateSize(true);
+          }
+        }, 300);
+      }
+    });
   }
   
-  closeMap() {
-    this._cleanupMap();
-  }
-  
-  _cleanupMap() {
-    if (this.#map) {
-      this.#map.remove();
-      this.#map = null;
-      this.#marker = null;
-    }
+  _cleanupMaps() {
+    // Clean up all maps
+    Object.values(this.#storyMaps).forEach(mapData => {
+      if (mapData && mapData.map) {
+        mapData.map.remove();
+      }
+    });
+    
+    this.#storyMaps = {};
   }
 }
