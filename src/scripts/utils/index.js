@@ -42,7 +42,7 @@ export function showAlert(message, type = 'info', duration = 3000) {
 
 export function createStoryItemTemplate(story) {
   const hasLocation = story.lat && story.lon;
-  // TODO
+  
   return `
     <article class="story-item">
       <div class="story-image-container">
@@ -52,16 +52,20 @@ export function createStoryItemTemplate(story) {
           loading="lazy">
       </div>
       <div class="story-content">
-        <h3 class="story-name">${story.name}</h3>
-        <p class="story-description">${story.description}</p>
-        <div class="story-meta">
-          <p class="story-date">${showFormattedDate(story.createdAt)}</p>
-          ${hasLocation ? `<button class="map-toggle-button" data-id="${story.id}" data-lat="${story.lat}" data-lon="${story.lon}">
-            <i class="fas fa-map-marker-alt"></i> Show on map
-          </button>` : ''} 
-        </div>
+      <h3 class="story-name">${story.name}</h3>
+      <p class="story-description">${story.description}</p>
+      <div class="story-meta">
+      <p class="story-date">${showFormattedDate(story.createdAt)}</p>
       </div>
-      <a href="#/story/${story.id}" class="story-link" aria-label="View details of story by ${story.name}"></a>
+      <a href="#/story/${story.id}" class="story-link" aria-label="View details of story by ${story.name}">
+        <span class="visually-hidden">View ${story.name}'s story</span>
+      </a>
+        ${hasLocation ? `
+          <div class="story-map-container" data-id="${story.id}" data-lat="${story.lat}" data-lon="${story.lon}">
+            <div class="story-inline-map" id="map-${story.id}"></div>
+          </div>
+        ` : ''}
+      </div>
     </article>
   `;
 }
