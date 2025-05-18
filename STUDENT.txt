@@ -1,2 +1,2 @@
-APP_URL=<url_aplikasi>
+APP_URL=https://story-share-app.netlify.app/
 MAP_SERVICE_API_KEY=ChVFA4WTImqqE0Tx33qF
