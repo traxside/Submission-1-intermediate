@@ -8,16 +8,17 @@ export default class ProfilePresenter {
   #user;
   #isSubscribed = false;
 
-  constructor({ view, model }) {
+  constructor({ view, model}) {
     this.#view = view;
-    this.#model = model || Auth;
+    this.#model = model;
     this.#user = this.#model.getUser();
   }
 
   async loadProfile() {
+    console.log("From load profile", this.#user);
     if (!this.#user) {
-      // Redirect to login if no user found
-      window.location.hash = '#/login';
+      // find user
+      this.#user = this.#model.getUser();
       return;
     }
 
@@ -51,6 +52,7 @@ export default class ProfilePresenter {
   }
 
   async handleNotificationToggle() {
+    console.log('handleNotificationToggle called');
     try {
       // Show loading state
       this.#view.setNotificationButtonLoading(true);

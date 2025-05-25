@@ -20,6 +20,7 @@ class Auth {
 
   static getUser() {
     const user = localStorage.getItem(CONFIG.USER_KEY);
+    console.log(user);
     if (user) {
       return JSON.parse(user);
     }

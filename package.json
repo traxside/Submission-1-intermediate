@@ -5,7 +5,7 @@
   "scripts": {
     "build": "webpack --config ./webpack.prod.js",
     "start-dev": "webpack serve --config ./webpack.dev.js",
-    "serve": "http-server ./dist --port 3000"
+    "serve": "http-server ./dist --port 3001"
   },
   "keywords": [],
   "author": "Richie Leonardo <richie.leonardoo@gmail.com>",
