@@ -53,36 +53,76 @@ export default class ProfilePage {
   }
 
   async afterRender() {
+    // Wait for DOM to be ready before initializing
+    await this._waitForDOM();
     await this.#presenter.loadProfile();
     await this.#presenter.initializeNotifications();
     this._setupEventListeners();
   }
 
-  _setupEventListeners() {
-    const logoutButton = document.getElementById('logout-button');
-    const toggleNotificationsButton = document.getElementById('toggle-notifications');
-    const testNotificationButton = document.getElementById('test-notification');
+  // Wait for DOM elements to be available
+  async _waitForDOM() {
+    return new Promise((resolve) => {
+      const checkDOM = () => {
+        const requiredElements = [
+          '#profile-info',
+          '#notification-status',
+          '#toggle-notifications',
+          '#test-notification',
+          '#logout-button'
+        ];
 
-    // Logout handler
-    logoutButton.addEventListener('click', (e) => {
-      e.preventDefault();
-      this.#presenter.logout();
-    });
+        const allElementsExist = requiredElements.every(selector =>
+            document.querySelector(selector) !== null
+        );
 
-    // Notification toggle handler
-    toggleNotificationsButton.addEventListener('click', () => {
-      this.#presenter.handleNotificationToggle();
-    });
+        if (allElementsExist) {
+          resolve();
+        } else {
+          // Use setTimeout instead of requestAnimationFrame for better reliability
+          setTimeout(checkDOM, 10);
+        }
+      };
 
-    // Test notification handler
-    testNotificationButton.addEventListener('click', () => {
-      this.#presenter.sendTestNotification();
+      checkDOM();
     });
   }
 
-  // View methods
+  _setupEventListeners() {
+    const logoutButton = document.querySelector('#logout-button');
+    const toggleNotificationsButton = document.querySelector('#toggle-notifications');
+    const testNotificationButton = document.querySelector('#test-notification');
+
+    console.log("All button found : ", logoutButton, toggleNotificationsButton, testNotificationButton);
+
+    if (logoutButton) {
+      logoutButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        this.#presenter.logout();
+      });
+    }
+
+    if (toggleNotificationsButton) {
+      toggleNotificationsButton.addEventListener('click', () => {
+        this.#presenter.handleNotificationToggle();
+      });
+    }
+
+    if (testNotificationButton) {
+      testNotificationButton.addEventListener('click', () => {
+        this.#presenter.sendTestNotification();
+      });
+    }
+  }
+
+  // View methods - now with proper error handling
   showProfile(user) {
-    const profileInfo = document.getElementById('profile-info');
+    const profileInfo = document.querySelector('#profile-info');
+    if (!profileInfo) {
+      console.error('Profile info element not found');
+      return;
+    }
+
     profileInfo.innerHTML = `
       <h2>${user.name}</h2>
       <p>User ID: ${user.id}</p>
@@ -91,19 +131,26 @@ export default class ProfilePage {
 
   showNotificationStatus(message, type = 'info') {
     const statusDiv = document.querySelector('#notification-status');
+    if (!statusDiv) {
+      console.error('Notification status element not found');
+      return;
+    }
+
     const iconClass = type === 'error' ? 'fas fa-exclamation-triangle' :
         type === 'warning' ? 'fas fa-exclamation-circle' :
             type === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle';
 
     statusDiv.innerHTML = `
-      <p class="status-text ${type}">
+      <p class="status-text">
         <i class="${iconClass}"></i>
         ${message}
       </p>
     `;
 
     const toggleButton = document.querySelector('#toggle-notifications');
-    toggleButton.style.display = type === 'error' || type === 'warning' ? 'none' : 'inline-block';
+    if (toggleButton) {
+      toggleButton.style.display = type === 'error' || type === 'warning' ? 'none' : 'inline-block';
+    }
   }
 
   updateNotificationUI(isSubscribed) {
@@ -111,9 +158,11 @@ export default class ProfilePage {
     const toggleButton = document.querySelector('#toggle-notifications');
     const testButton = document.querySelector('#test-notification');
 
+    console.log("DEBUG: ", statusDiv, toggleButton, testButton);
+
     if (isSubscribed) {
       statusDiv.innerHTML = `
-        <p class="status-text success">
+        <p class="status-text">
           <i class="fas fa-check-circle"></i>
           You are subscribed to push notifications
         </p>
@@ -141,11 +190,15 @@ export default class ProfilePage {
   }
 
   setNotificationButtonLoading(isLoading = true) {
-    const toggleButton = document.getElementById('toggle-notifications');
+    const toggleButton = document.querySelector('#toggle-notifications');
+    if (!toggleButton) {
+      console.error('Toggle notification button not found');
+      return;
+    }
 
     if (isLoading) {
       toggleButton.disabled = true;
-      toggleButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+      // toggleButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
     } else {
       toggleButton.disabled = false;
     }
