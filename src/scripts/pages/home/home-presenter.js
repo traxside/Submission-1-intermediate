@@ -91,15 +91,4 @@ export default class HomePresenter {
       }
     });
   }
-  
-  _cleanupMaps() {
-    // Clean up all maps
-    Object.values(this.#storyMaps).forEach(mapData => {
-      if (mapData && mapData.map) {
-        mapData.map.remove();
-      }
-    });
-    
-    this.#storyMaps = {};
-  }
 }

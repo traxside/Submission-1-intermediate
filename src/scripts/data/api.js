@@ -171,6 +171,7 @@ async function getStoryDetail(token, storyID) {
   }
 }
 
+// Public VAPID Key : BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmtrx8biyPi_E-1fSGABK_Qs_GlvPoJJqxbk
 async function subscribeNotification(token, subscription) {
   try {
     const response = await fetch(ENDPOINTS.SUBSCRIBE, {

@@ -1,6 +1,8 @@
 import routes from '../routes/routes';
 import { getActiveRoute, parseActivePathname } from '../routes/url-parser';
 import Auth from '../data/auth';
+import {isServiceWorkerAvailable} from "../utils";
+
 
 class App {
   #content = null;
@@ -74,7 +76,7 @@ class App {
   async renderPage() {
     const url = getActiveRoute();
     const { id } = parseActivePathname();
-    
+
     // Check if route requires authentication
     const protectedRoutes = ['/add', '/profile'];
     if (protectedRoutes.includes(url) && !Auth.isLoggedIn()) {
