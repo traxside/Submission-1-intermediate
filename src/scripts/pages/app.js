@@ -87,38 +87,28 @@ class App {
     // Update navigation before rendering
     this._updateNavigation();
 
+    // Find the page to render
+    let page = routes[url];
+
+    // If no exact match found, use the NotFoundPage
+    if (!page) {
+      page = routes['*'];
+    }
+
     // Use View Transition API if supported
     if (document.startViewTransition && document.startViewTransition.isSupported) {
       document.startViewTransition(async () => {
-        const page = routes[url];
-        if (!page) {
-          this.#content.innerHTML = `
-            <section class="container error-container">
-              <h2>404 - Page Not Found</h2>
-              <p>The page you're looking for doesn't exist.</p>
-            </section>
-          `;
-          return;
-        }
-
         this.#content.innerHTML = await page.render(id);
-        await page.afterRender(id);
+        if (page.afterRender) {
+          await page.afterRender(id);
+        }
       });
     } else {
       // Fallback for browsers that don't support View Transition API
-      const page = routes[url];
-      if (!page) {
-        this.#content.innerHTML = `
-          <section class="container error-container">
-            <h2>404 - Page Not Found</h2>
-            <p>The page you're looking for doesn't exist.</p>
-          </section>
-        `;
-        return;
-      }
-
       this.#content.innerHTML = await page.render(id);
-      await page.afterRender(id);
+      if (page.afterRender) {
+        await page.afterRender(id);
+      }
     }
   }
 }
