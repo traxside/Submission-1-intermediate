@@ -1,0 +1,102 @@
+{
+  "id": "/#/",
+  "start_url": "/#/",
+  "scope": "/",
+  "name": "Story Share App",
+  "short_name": "StoryShare",
+  "description": "Aplikasi untuk berbagi cerita dan story seputar dicoding atau hal lainnya",
+  "display": "standalone",
+  "background_color": "#FFFFFF",
+  "theme_color": "#d97706",
+  "icons": [
+    {
+      "src": "images/icons/icon-x144.png",
+      "type": "image/png",
+      "sizes": "144x144",
+      "purpose": "any"
+    },
+    {
+      "src": "images/icons/maskable-icon-x48.png",
+      "type": "image/png",
+      "sizes": "48x48",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icons/maskable-icon-x96.png",
+      "type": "image/png",
+      "sizes": "96x96",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icons/maskable-icon-x192.png",
+      "type": "image/png",
+      "sizes": "192x192",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icons/maskable-icon-x384.png",
+      "type": "image/png",
+      "sizes": "384x384",
+      "purpose": "maskable"
+    },
+    {
+      "src": "images/icons/maskable-icon-x512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "images/screenshots/StoryShareApp_001.png",
+      "sizes": "2879x1456",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "images/screenshots/StoryShareApp_002.png",
+      "sizes": "2879x1456",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+      "src": "images/screenshots/StoryShareApp_003.png",
+      "sizes": "2879x1456",
+      "type": "image/png",
+      "form_factor": "wide"
+    },
+    {
+    "src": "images/screenshots/StoryShareApp_004.png",
+    "sizes": "1080x2280",
+    "type": "image/png",
+    "form_factor": "narrow"
+    },
+    {
+    "src": "images/screenshots/StoryShareApp_005.png",
+    "sizes": "1080x2280",
+    "type": "image/png",
+    "form_factor": "narrow"
+    },
+    {
+    "src": "images/screenshots/StoryShareApp_006.png",
+    "sizes": "1080x2280",
+    "type": "image/png",
+    "form_factor": "narrow"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Story baru",
+      "short_name": "Baru",
+      "description": "Menambahkan story baru",
+      "url": "/?source=pwa#/add",
+      "icons": [
+        {
+          "src": "images/icons/add-x512.png",
+          "type": "image/png",
+          "sizes": "512x512"
+        }
+      ]
+    }
+  ]
+}
