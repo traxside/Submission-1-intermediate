@@ -103,10 +103,6 @@ class PushNotificationManager {
             const result = await subscribeNotification(token, this.subscription.toJSON());
             console.log('Subscription sent to server:', result);
             // new Notification('Subscription created successfully', { body: 'Kamu sudah berhasil mengaktifkan notification untuk story-app-share'});
-            await self.registration.showNotification('Subscription created successfully', {
-                body: 'Kamu sudah berhasil mengaktifkan notification untuk story-app-share',
-                requireInteraction: false,
-            });
             return {
                 success: true,
                 subscription: this.subscription,
