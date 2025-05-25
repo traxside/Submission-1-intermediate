@@ -48,6 +48,7 @@ class App {
     if (isLoggedIn) {
       navItems += `
         <li><a href="#/add">Add Story</a></li>
+        <li><a href="#/bookmark">Bookmark</a></li>
         <li><a href="#/profile">Profile</a></li>
         <li><a href="#/" id="logout-button">Logout</a></li>
       `;

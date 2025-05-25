@@ -1,6 +1,7 @@
 import DetailStoryPresenter from './detail-story-presenter.js';
 import Story from '../../data/story';
 import { showLoading, showFormattedDate } from '../../utils';
+import Database from  '../../data/database';
 
 export default class DetailStoryPage {
   #presenter;
@@ -11,12 +12,7 @@ export default class DetailStoryPage {
   
   async render() {
     return `
-      <div class="skip-link-container">
-        <a href="#main-content" class="skip-link">Skip to content</a>
-      </div>
-      <section class="container detail-story-page" id="main-content">
-        <div id="story-detail" class="story-detail"></div>
-      </section>
+      <div id="story-detail" class="story-detail"></div>
     `;
   }
 
@@ -24,10 +20,13 @@ export default class DetailStoryPage {
     this.#presenter = new DetailStoryPresenter({ 
       view: this,
       model: Story,
-      id
+      id,
+      dbModel: Database,
     });
-    
+
     await this.#presenter.loadStoryDetail();
+
+    await this.#presenter.showSaveButton(); // Initialize listener
   }
   
   showLoading() {
@@ -50,6 +49,7 @@ export default class DetailStoryPage {
           <i class="fas fa-arrow-left"></i> Back to Stories
         </a>
         <h1 class="story-title">Story by ${story.name}</h1>
+        <div class="button-container"></div>
       </div>
       
       <div class="story-content">
@@ -80,5 +80,56 @@ export default class DetailStoryPage {
     if (mapContainer) {
       mapContainer.innerHTML = '<div class="error-message">Could not load map</div>';
     }
+  }
+
+  renderSaveButton() {
+    document.querySelector('.button-container').innerHTML =
+        this.generateSaveStoryButtonTemplate();
+
+    document.querySelector('#story-detail-save').addEventListener('click', async () => {
+      await this.#presenter.saveStory();
+      await this.#presenter.showSaveButton();
+    })
+  }
+
+  renderRemoveButton() {
+    document.querySelector('.button-container').innerHTML =
+        this.generateRemoveStoryButtonTemplate();
+
+    document.querySelector('#story-detail-remove').addEventListener('click', async () => {
+      await this.#presenter.deleteStory();
+      await this.#presenter.showSaveButton();
+    })
+  }
+
+  saveToBookmarkSuccessfully(message) {
+    console.log(message);
+  }
+
+  saveToBookmarkFailed(message) {
+    alert(message);
+  }
+
+  removeFromBookmarkSuccessfully(message) {
+    console.log(message);
+  }
+  removeFromBookmarkFailed(message) {
+    alert(message);
+  }
+
+  generateSaveStoryButtonTemplate() {
+    return `
+    <button id="story-detail-save" class="btn btn-transparent">
+      Simpan story <i class="far fa-bookmark"></i>
+    </button>
+  `;
+  }
+
+  generateRemoveStoryButtonTemplate() {
+    return `
+    <button id="story-detail-remove" class="btn btn-transparent">
+      Buang story <i class="fas fa-bookmark"></i>
+    </button>
+  `;
   }
 }
