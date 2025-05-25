@@ -6,6 +6,7 @@ import AddStoryPage from '../pages/add-story/add-story-page';
 import DetailStoryPage from '../pages/detail-story/detail-story-page';
 import ProfilePage from '../pages/profile/profile-page';
 import BookmarkPage from "../pages/bookmark/bookmark-page";
+import NotFoundPage from "../pages/not-found/not-found-page";
 
 const routes = {
   '/': new HomePage(),
@@ -16,6 +17,7 @@ const routes = {
   '/story/:id': new DetailStoryPage(),
   '/profile': new ProfilePage(),
   '/bookmark':  new BookmarkPage(),
+  '*': new  NotFoundPage(),
 };
 
 export default routes;
