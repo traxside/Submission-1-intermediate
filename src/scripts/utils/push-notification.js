@@ -1,4 +1,3 @@
-
 import { subscribeNotification, unsubscribeNotification } from '../data/api.js';
 import Auth from '../data/auth.js';
 
@@ -6,19 +5,14 @@ const VAPID_PUBLIC_KEY = 'BCCs2eonMI-6H2ctvFaWg-UYdDv387Vno_bzUzALpB442r2lCnsHmt
 
 class PushNotificationManager {
     constructor() {
-        this.isSupported = 'serviceWorker' in navigator && 'PushManager' in window;
         this.registration = null;
         this.subscription = null;
     }
 
-    // Check if push notifications are supported
-    isNotificationSupported() {
-        return this.isSupported;
-    }
 
     // Request notification permission
     async requestPermission() {
-        if (!this.isSupported) {
+        if (!'serviceWorker' in navigator && 'PushManager' in window) {
             throw new Error('Push notifications are not supported');
         }
 
@@ -28,22 +22,29 @@ class PushNotificationManager {
 
     // Check current permission status
     getPermissionStatus() {
-        if (!this.isSupported) return 'unsupported';
+        if (!('serviceWorker' in navigator && 'PushManager' in window)) return 'unsupported';
         return Notification.permission;
     }
 
-    // Register service worker
-    async registerServiceWorker() {
-        if (!this.isSupported) {
+    // Get existing service worker registration
+    async getServiceWorkerRegistration() {
+        if (!('serviceWorker' in navigator && 'PushManager' in window)) {
             throw new Error('Service Worker is not supported');
         }
 
         try {
-            this.registration = await navigator.serviceWorker.register('./sw.bundle.js');
-            console.log('Service Worker registered:', this.registration);
+            // First try to get existing registration
+            this.registration = await navigator.serviceWorker.getRegistration();
+
+            if (!this.registration) {
+                // Wait for service worker to be ready (assuming it's being registered elsewhere)
+                this.registration = await navigator.serviceWorker.ready;
+            }
+
+            console.log('Service Worker registration obtained:', this.registration);
             return this.registration;
         } catch (error) {
-            console.error('Service Worker registration failed:', error);
+            console.error('Failed to get Service Worker registration:', error);
             throw error;
         }
     }
@@ -73,9 +74,9 @@ class PushNotificationManager {
                 throw new Error('Permission denied for notifications');
             }
 
-            // Register service worker if not already registered
+            // Get service worker registration
             if (!this.registration) {
-                await this.registerServiceWorker();
+                await this.getServiceWorkerRegistration();
             }
 
             // Wait for service worker to be ready
@@ -119,9 +120,10 @@ class PushNotificationManager {
         try {
             if (!this.subscription) {
                 // Try to get existing subscription
-                if (this.registration) {
-                    this.subscription = await this.registration.pushManager.getSubscription();
+                if (!this.registration) {
+                    await this.getServiceWorkerRegistration();
                 }
+                this.subscription = await this.registration.pushManager.getSubscription();
             }
 
             if (!this.subscription) {
@@ -163,7 +165,7 @@ class PushNotificationManager {
     async isSubscribed() {
         try {
             if (!this.registration) {
-                this.registration = await navigator.serviceWorker.getRegistration();
+                await this.getServiceWorkerRegistration();
             }
 
             if (!this.registration) {
@@ -183,7 +185,7 @@ class PushNotificationManager {
     async getSubscription() {
         try {
             if (!this.registration) {
-                this.registration = await navigator.serviceWorker.getRegistration();
+                await this.getServiceWorkerRegistration();
             }
 
             if (!this.registration) {

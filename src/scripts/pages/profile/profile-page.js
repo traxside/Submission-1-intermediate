@@ -65,7 +65,7 @@ export default class ProfilePage {
   async _initializeNotifications() {
     try {
       // Check if push notifications are supported
-      if (!pushNotificationManager.isNotificationSupported()) {
+      if (!('serviceWorker' in navigator && 'PushManager' in window)) {
         this._showNotificationStatus('Push notifications are not supported in this browser', 'warning');
         return;
       }

@@ -1,7 +1,6 @@
 import routes from '../routes/routes';
 import { getActiveRoute, parseActivePathname } from '../routes/url-parser';
 import Auth from '../data/auth';
-import {isServiceWorkerAvailable} from "../utils";
 
 
 class App {
